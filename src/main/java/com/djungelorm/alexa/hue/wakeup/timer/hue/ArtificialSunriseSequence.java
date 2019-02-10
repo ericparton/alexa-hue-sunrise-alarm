@@ -3,6 +3,7 @@ package com.djungelorm.alexa.hue.wakeup.timer.hue;
 import com.djungelorm.alexa.hue.wakeup.timer.Configuration;
 import com.djungelorm.alexa.hue.wakeup.timer.http.alexa.AlexaNotification;
 import com.github.zeroone3010.yahueapi.Hue;
+import com.github.zeroone3010.yahueapi.Light;
 import com.github.zeroone3010.yahueapi.Room;
 import com.github.zeroone3010.yahueapi.State;
 
@@ -10,10 +11,12 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class ArtificialSunriseSequence implements Runnable {
     private final AlexaNotification alarm;
@@ -24,6 +27,7 @@ public class ArtificialSunriseSequence implements Runnable {
     private ScheduledFuture scheduledFuture;
     private List<State> sequenceSteps;
     private Integer stepDuration;
+    private Map<String, State> initialLightStates;
 
     public ArtificialSunriseSequence(final AlexaNotification alarm, final Hue hueHttpClient) {
         this.alarm = alarm;
@@ -45,25 +49,37 @@ public class ArtificialSunriseSequence implements Runnable {
 
         stepDuration = Math.round((float) sequenceDuration / sequenceSteps.size());
 
-        System.out.println(String.format("Scheduling %d sequence steps %dms apart", sequenceSteps.size(), stepDuration));
+        System.out.println(String.format("Scheduling %d sequence steps %d seconds apart", sequenceSteps.size(), stepDuration / 1000));
 
         //The API requires transition time to be in centiseconds (???)
         sequenceSteps.forEach(state -> state.setTransitiontime(Math.round(stepDuration / 100f)));
 
-        getHueRoom().setState(StateFactory.buildState(true, 0.67f, 0.39f, 1));
-        scheduledFuture = scheduler.schedule(this, stepDuration, TimeUnit.MILLISECONDS);
+        var hueRoom = getHueRoom();
+
+        initialLightStates = hueRoom.getLights().stream().collect(Collectors.toMap(Light::getName, Light::getState));
+
+        //Initial sunrise state
+        hueRoom.setState(StateFactory.buildState(true, 0.67f, 0.39f, 1));
+
+        scheduledFuture = scheduler.schedule(this, 0, TimeUnit.MILLISECONDS);
     }
 
     @Override
     public void run() {
-        System.out.println("Executing next step of artificial sunrise sequence");
+        System.out.println("Executing step of artificial sunrise sequence");
 
-        getHueRoom().setState(sequenceSteps.remove(0));
+        var hueRoom = getHueRoom();
 
         if (!sequenceSteps.isEmpty()) {
+            hueRoom.setState(sequenceSteps.remove(0));
+            System.out.println(String.format("Completed step of artificial sunrise sequence. %d step(s) remain", sequenceSteps.size()));
             scheduledFuture = scheduler.schedule(this, stepDuration, TimeUnit.MILLISECONDS);
         } else {
-            System.out.println("Artificial sunrise sequence completed");
+            System.out.println("Artificial sunrise sequence completed. Restoring original light states");
+            initialLightStates.forEach((key, value) -> hueRoom.getLightByName(key).ifPresent(light -> {
+                value.setOn(true);
+                light.setState(value);
+            }));
         }
     }
 
