@@ -1,4 +1,4 @@
-<h1>Alexa Hue Wakeup Timer</h1>
+<h1>Alexa Hue Sunrise Alarm</h1>
 
 Requires Java JDK 11+
 
@@ -22,4 +22,4 @@ docker run -e TZ=America/New_York \
 
 TODO: explain environment variables, note usage of alexa.amazon.com/api
 
-Thanks to <a href="https://github.com/ZeroOne3010">ZeroOne3010</a> for the <a href="https://github.com/ZeroOne3010/yetanotherhueapi">yetanotherhueapi</a> hue bridge client library, which made this much easier.
+Thanks to <a href="https://github.com/ZeroOne3010">ZeroOne3010</a> for the <a href="https://github.com/ZeroOne3010/yetanotherhueapi">yetanotherhueapi</a> hue bridge client library and to <a href="https://community.home-assistant.io/t/wake-up-sunrise-simulation-with-the-philips-hue-and-sleep-as-android/82437">farlock85</a> for a list of <a href="https://community.home-assistant.io/t/wake-up-sunrise-simulation-with-the-philips-hue-and-sleep-as-android/82437">sunrise colors</a>.
