@@ -6,32 +6,30 @@ package com.djungelorm.alexa.hue.wakeup.timer;
 import com.djungelorm.alexa.hue.wakeup.timer.http.alexa.AlexaDevice;
 import com.djungelorm.alexa.hue.wakeup.timer.http.alexa.AlexaHttpClient;
 import com.djungelorm.alexa.hue.wakeup.timer.http.alexa.AlexaNotification;
+import com.djungelorm.alexa.hue.wakeup.timer.hue.ArtificialSunriseSequence;
 import com.github.zeroone3010.yahueapi.Hue;
-import com.github.zeroone3010.yahueapi.State;
 
 import java.time.*;
-import java.util.Comparator;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 public class App {
     private static AlexaHttpClient alexaHttpClient;
     private static Hue hueHttpClient;
+    private static ArtificialSunriseSequence currentSunriseSequence;
 
     //TODO: replace System.out.println with logging
-    //TODO: set light color to match sunrise
     public static void main(String[] args) {
         alexaHttpClient = new AlexaHttpClient(Configuration.getAlexaAuthenticationCookie());
         hueHttpClient = new Hue(Configuration.getHueBridgeIpAddress(), Configuration.getHueApiKey());
 
-        System.out.println("Starting Alexa Hue Wakeup Timer...");
+        System.out.println("Starting Alexa Hue Wakeup Timer");
 
         var refreshInterval = Configuration.getRefreshInterval();
         var timer = new Timer();
 
         timer.scheduleAtFixedRate(new AppTask(), 0, refreshInterval);
 
-        System.out.println(String.format("Task scheduled to fire every %d minutes", refreshInterval));
+        System.out.println(String.format("Task scheduled to fire every %d seconds", refreshInterval / 1000));
     }
 
     private static class AppTask extends TimerTask {
@@ -51,37 +49,33 @@ public class App {
             var now = LocalDateTime.now();
             var sequenceDuration = Configuration.getSequenceDuration();
 
-            var minutesUntilNextAlarm = alexaHttpClient.getNotifications().stream()
+            var nextAlarm = alexaHttpClient.getNotifications().stream()
                     .filter(alexaNotification -> alexaNotification.getDeviceSerialNumber().equals(alexaDeviceId.get()))
                     .filter(alexaNotification -> alexaNotification.getStatus().equals("ON"))
                     .filter(alexaNotification -> alexaNotification.getType().equals("Alarm"))
-                    .map(AlexaNotification::getAlarmTime)
-                    .map(alarmTime -> Duration.between(now, alarmTime).toMinutes())
-                    .filter(duration -> duration < sequenceDuration)
-                    .min(Comparator.naturalOrder());
+                    .filter(alexaNotification -> Duration.between(now, alexaNotification.getAlarmTime()).toSeconds() <= sequenceDuration * 60)
+                    .min(Comparator.comparing(AlexaNotification::getAlarmTime));
 
-            if (!minutesUntilNextAlarm.isPresent()) {
+            if (!nextAlarm.isPresent()) {
+                if (currentSunriseSequence != null) {
+                    currentSunriseSequence.stop();
+                    currentSunriseSequence = null;
+                }
                 return;
             }
 
-            System.out.println(String.format("Found Alexa alarm scheduled to fire in %d minutes", minutesUntilNextAlarm.get()));
-
-            var roomName = Configuration.getHueRoomName();
-            var room = hueHttpClient.getRoomByName(roomName);
-
-            if (!room.isPresent()) {
-                System.out.println(String.format("No Hue room named '%s' was found", roomName));
-                return;
+            if (currentSunriseSequence != null) {
+                if (currentSunriseSequence.getAlarm().getAlarmTime().equals(nextAlarm.get().getAlarmTime())) {
+                    return;
+                } else {
+                    currentSunriseSequence.stop();
+                }
             }
 
-            var brightness = (int) Math.round((1 - (minutesUntilNextAlarm.get() / (double) sequenceDuration)) * 256);
+            System.out.println(String.format("Alarm found for %s", nextAlarm.get().getAlarmTime()));
 
-            System.out.println(String.format("Setting brightness in %s to %d", roomName, brightness));
-
-            room.get().getLights().forEach(light -> {
-                light.turnOn();
-                light.setBrightness(brightness);
-            });
+            currentSunriseSequence = new ArtificialSunriseSequence(nextAlarm.get(), hueHttpClient);
+            currentSunriseSequence.start();
         }
     }
 }
