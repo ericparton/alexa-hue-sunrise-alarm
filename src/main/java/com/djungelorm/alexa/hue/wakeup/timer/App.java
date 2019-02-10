@@ -11,6 +11,8 @@ import com.github.zeroone3010.yahueapi.Hue;
 
 import java.time.*;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class App {
     private static AlexaHttpClient alexaHttpClient;
@@ -25,14 +27,14 @@ public class App {
         System.out.println("Starting Alexa Hue Wakeup Timer");
 
         var refreshInterval = Configuration.getRefreshInterval();
-        var timer = new Timer();
+        var scheduler = Executors.newScheduledThreadPool(1);
 
-        timer.scheduleAtFixedRate(new AppTask(), 0, refreshInterval);
+        scheduler.scheduleAtFixedRate(new AppTask(), 0, refreshInterval, TimeUnit.SECONDS);
 
-        System.out.println(String.format("Task scheduled to fire every %d seconds", refreshInterval / 1000));
+        System.out.println(String.format("Task scheduled to fire every %d seconds", refreshInterval));
     }
 
-    private static class AppTask extends TimerTask {
+    private static class AppTask implements Runnable {
         @Override
         public void run() {
             var alexaDeviceName = Configuration.getAlexaDeviceName();

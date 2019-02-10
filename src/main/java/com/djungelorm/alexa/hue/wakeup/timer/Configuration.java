@@ -2,7 +2,7 @@ package com.djungelorm.alexa.hue.wakeup.timer;
 
 public class Configuration {
     public static Long getRefreshInterval() {
-        return getEnvironmentVariableAsLong("REFRESH_INTERVAL") * 1000L;
+        return getEnvironmentVariableAsLong("REFRESH_INTERVAL");
     }
 
     public static Long getSequenceDuration() {
