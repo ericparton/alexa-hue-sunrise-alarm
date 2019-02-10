@@ -17,7 +17,7 @@ docker run -e TZ=America/New_York \
            -e ALEXA_AUTHENTICATION_COOKIE='TODO: write how to get this cookie' \
            -e REFRESH_INTERVAL=60 \
            -e PRE_ALARM_SEQUENCE_DURATION=30 \
-           alexa-hue-wakeup-timer:latest
+           alexa-hue-sunrise-alarm:latest
 </pre>
 
 TODO: explain environment variables, note usage of alexa.amazon.com/api
