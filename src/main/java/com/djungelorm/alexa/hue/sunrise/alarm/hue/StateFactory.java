@@ -1,4 +1,4 @@
-package com.djungelorm.alexa.hue.wakeup.timer.hue;
+package com.djungelorm.alexa.hue.sunrise.alarm.hue;
 
 import com.github.zeroone3010.yahueapi.State;
 

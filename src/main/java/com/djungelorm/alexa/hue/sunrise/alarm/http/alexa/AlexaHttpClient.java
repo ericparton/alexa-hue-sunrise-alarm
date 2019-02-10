@@ -1,6 +1,6 @@
-package com.djungelorm.alexa.hue.wakeup.timer.http.alexa;
+package com.djungelorm.alexa.hue.sunrise.alarm.http.alexa;
 
-import com.djungelorm.alexa.hue.wakeup.timer.Configuration;
+import com.djungelorm.alexa.hue.sunrise.alarm.Configuration;
 import com.google.gson.Gson;
 
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package com.djungelorm.alexa.hue.wakeup.timer;
+package com.djungelorm.alexa.hue.sunrise.alarm;
 
 public class Configuration {
     public static Long getRefreshInterval() {

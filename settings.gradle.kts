@@ -1,1 +1,1 @@
-rootProject.name = "alexa-hue-wakeup-timer"
+rootProject.name = "alexa-hue-sunrise-alarm"

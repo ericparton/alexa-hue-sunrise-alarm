@@ -1,4 +1,4 @@
-package com.djungelorm.alexa.hue.wakeup.timer.http.alexa;
+package com.djungelorm.alexa.hue.sunrise.alarm.http.alexa;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
