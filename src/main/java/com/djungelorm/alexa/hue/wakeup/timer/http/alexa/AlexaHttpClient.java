@@ -44,8 +44,7 @@ public class AlexaHttpClient {
             if (httpResponse.statusCode() == 200) {
                 return new Gson().fromJson(httpResponse.body(), clazz);
             } else {
-                //TODO: throw more useful exception here
-                throw new RuntimeException("" + httpResponse.statusCode());
+                throw new RuntimeException(String.format("Received non 200 response from %s: %d", endpoint, httpResponse.statusCode()));
             }
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
