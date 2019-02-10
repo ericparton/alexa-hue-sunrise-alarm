@@ -1,5 +1,6 @@
 package com.djungelorm.alexa.hue.wakeup.timer.http.alexa;
 
+import com.djungelorm.alexa.hue.wakeup.timer.Configuration;
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -7,8 +8,12 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.List;
 
+import static java.time.temporal.ChronoUnit.SECONDS;
+
+//TODO: automate login
 public class AlexaHttpClient {
     private static final String ALEXA_DEVICES_ENDPOINT = "https://alexa.amazon.com/api/devices-v2/device";
     private static final String ALEXA_NOTIFICATIONS_ENDPOINT = "https://alexa.amazon.com/api/notifications";
@@ -50,6 +55,7 @@ public class AlexaHttpClient {
     private static HttpClient getHttpClient() {
         return HttpClient.newBuilder()
                 .followRedirects(HttpClient.Redirect.ALWAYS)
+                .connectTimeout(Duration.of(Math.round(Configuration.getRefreshInterval() / 2f), SECONDS))
                 .build();
     }
 
