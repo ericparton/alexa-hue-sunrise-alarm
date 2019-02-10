@@ -11,10 +11,10 @@ To run:
 <pre>
 docker run -e TZ=America/New_York \
            -e HUE_ROOM_NAME=Bedroom \
-           -e HUE_API_KEY=Your api key
-           -e HUE_BRIDGE_IP_ADDRESS=192.168.1.151  
-           -e ALEXA_DEVICE_NAME="Bedroom Echo Dot" 
-           -e ALEXA_AUTHENTICATION_COOKIE='TODO: write how to get this cookie' 
+           -e HUE_API_KEY=Your api key \
+           -e HUE_BRIDGE_IP_ADDRESS=192.168.1.151 \
+           -e ALEXA_DEVICE_NAME="Bedroom Echo Dot" \
+           -e ALEXA_AUTHENTICATION_COOKIE='TODO: write how to get this cookie' \
            -e REFRESH_INTERVAL=60 \
            -e PRE_ALARM_SEQUENCE_DURATION=30 \
            alexa-hue-wakeup-timer:latest
