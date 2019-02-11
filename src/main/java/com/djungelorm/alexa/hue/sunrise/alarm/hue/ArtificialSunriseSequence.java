@@ -45,9 +45,9 @@ public class ArtificialSunriseSequence implements Runnable {
         sequenceStartTime = LocalDateTime.now();
         sequenceSteps = new ArrayList<>();
 
-        sequenceSteps.add(StateFactory.buildState(true, 0.65f, 0.41f, 85));
-        sequenceSteps.add(StateFactory.buildState(true, 0.60f, 0.40f, 170));
-        sequenceSteps.add(StateFactory.buildState(true, 0.48f, 0.40f, 255));
+        sequenceSteps.add(new State(true, List.of(0.65f, 0.41f), 85));
+        sequenceSteps.add(new State(true, List.of(0.60f, 0.40f), 170));
+        sequenceSteps.add(new State(true, List.of(0.48f, 0.40f), 255));
 
         var sequenceDuration = Duration.between(sequenceStartTime, alarm.getAlarmTime()).toMillis();
 
@@ -63,7 +63,7 @@ public class ArtificialSunriseSequence implements Runnable {
         initialLightStates = hueRoom.getLights().stream().collect(Collectors.toMap(Light::getName, Light::getState));
 
         //Initial sunrise state
-        hueRoom.setState(StateFactory.buildState(true, 0.67f, 0.39f, 1));
+        hueRoom.setState(new State(true, List.of(0.67f, 0.39f), 1));
 
         scheduledFuture = scheduler.schedule(this, 0, TimeUnit.MILLISECONDS);
     }
