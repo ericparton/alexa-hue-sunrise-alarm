@@ -18,7 +18,7 @@ dependencies {
 }
 
 application {
-    mainClassName = "com.djungelorm.alexa.hue.wakeup.timer.App"
+    mainClassName = "com.djungelorm.alexa.hue.sunrise.alarm.App"
 }
 
 docker {
