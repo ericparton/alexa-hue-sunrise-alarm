@@ -83,7 +83,10 @@ public class App {
                 currentSunriseSequence = new ArtificialSunriseSequence(nextAlarm.get(), hueHttpClient);
                 currentSunriseSequence.start();
             } catch (Exception e) {
-                log.error(e);
+                log.error("An error has occurred while processing alarm configuration.");
+                if (!e.getMessage().isBlank()) {
+                    log.error(e);
+                }
             }
         }
     }

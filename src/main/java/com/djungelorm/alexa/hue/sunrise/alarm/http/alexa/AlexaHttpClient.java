@@ -1,7 +1,10 @@
 package com.djungelorm.alexa.hue.sunrise.alarm.http.alexa;
 
 import com.djungelorm.alexa.hue.sunrise.alarm.Configuration;
+import com.djungelorm.alexa.hue.sunrise.alarm.hue.ArtificialSunriseSequence;
 import com.google.gson.Gson;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.URI;
@@ -15,6 +18,8 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 
 //TODO: automate login
 public class AlexaHttpClient {
+    private static final Logger log = LogManager.getLogger(ArtificialSunriseSequence.class);
+
     private static final String ALEXA_DEVICES_ENDPOINT = "https://alexa.amazon.com/api/devices-v2/device";
     private static final String ALEXA_NOTIFICATIONS_ENDPOINT = "https://alexa.amazon.com/api/notifications";
 
@@ -40,11 +45,16 @@ public class AlexaHttpClient {
         try {
             var httpRequest = getHttpRequest(endpoint, authenticationCookie);
             var httpResponse = getHttpClient().send(httpRequest, HttpResponse.BodyHandlers.ofString());
+            var httpUri = httpResponse.uri();
 
-            if (httpResponse.statusCode() == 200) {
+            if (httpUri.getPath().contains("signin")) {
+                log.error("Alexa authentication cookie has expired. Please obtain a new one.");
+                throw new RuntimeException();
+            } else if (httpResponse.statusCode() == 200) {
                 return new Gson().fromJson(httpResponse.body(), clazz);
             } else {
-                throw new RuntimeException(String.format("Received non 200 response from %s: %d", endpoint, httpResponse.statusCode()));
+                log.error("Received non 200 response from {}: {}", endpoint, httpResponse.statusCode());
+                throw new RuntimeException();
             }
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
