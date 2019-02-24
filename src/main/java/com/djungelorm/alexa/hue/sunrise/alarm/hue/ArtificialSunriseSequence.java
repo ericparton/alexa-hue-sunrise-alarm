@@ -92,8 +92,10 @@ public class ArtificialSunriseSequence implements Runnable {
     }
 
     public void stop() {
+        log.info("Stopping artificial sunrise sequence and restoring original light state");
         sequenceStartTime = null;
-        scheduledFuture.cancel(false);
+        scheduledFuture.cancel(true);
+        initialLightStates.forEach((key, value) -> getHueRoom().getLightByName(key).ifPresent(light -> light.setState(value)));
     }
 
     public AlexaNotification getAlarm() {
