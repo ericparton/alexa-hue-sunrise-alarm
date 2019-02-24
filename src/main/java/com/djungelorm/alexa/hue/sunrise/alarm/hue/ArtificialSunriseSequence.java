@@ -82,8 +82,8 @@ public class ArtificialSunriseSequence implements Runnable {
             } else {
                 log.info("Artificial sunrise sequence completed. Restoring original light states");
                 initialLightStates.forEach((key, value) -> hueRoom.getLightByName(key).ifPresent(light -> {
-                    value.setOn(true);
                     light.setState(value);
+                    light.turnOn();
                 }));
             }
         } catch (Exception e) {
